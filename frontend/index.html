@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReciclaPET - Panel Integrador</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="landing-container" class="landing-page">
+        <div class="landing-info">
+            <h1>ReciclaPET</h1>
+            <p class="subtitle">Transformación sustentable de plástico PET a filamento para impresión 3D.</p>
+            <p>Nuestro sistema integrador automatiza la extrusión de plástico reciclado utilizando tecnología de telemetría avanzada mediante el microcontrolador ESP32. Monitorea variables operativas en tiempo real, genera reportes automatizados de rendimiento y contribuye a la reducción de residuos plásticos dentro de la comunidad tecnológica.</p>
+            <div class="landing-image-placeholder">
+                <img src="img/reciclaPET.png" alt="Ecosistema de Reciclaje Automatizado">
+            </div>
+        </div>
+        
+        <div class="landing-auth">
+            <div class="auth-card">
+                <h2>Acceso al Dispositivo</h2>
+                <div class="input-group">
+                    <label for="auth-name">Nombre de Usuario</label>
+                    <input type="text" id="auth-name" placeholder="Ingrese su nombre">
+                </div>
+                <div class="input-group">
+                    <label for="auth-key">Clave del Dispositivo</label>
+                    <input type="password" id="auth-key" placeholder="Ingrese clave única">
+                </div>
+                <div class="auth-buttons">
+                    <button onclick="login()" class="btn-primary">Iniciar Sesión</button>
+                    <button onclick="register()" class="btn-secondary">Registrarse</button>
+                </div>
+                <p id="auth-msg" class="msg-alert"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-container" class="app-layout hidden">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>ReciclaPET</h3>
+                <span class="user-badge" id="user-display"></span>
+            </div>
+            <nav class="sidebar-menu">
+                <button onclick="scrollToSection('sec-telemetria')" class="menu-item active" id="btn-nav-telemetria">Telemetría del Dispositivo</button>
+                <button onclick="scrollToSection('sec-historial')" class="menu-item" id="btn-nav-historial">Historial de Producción</button>
+                <button onclick="scrollToSection('sec-top')" class="menu-item" id="btn-nav-top">Top Recicladores</button>
+                <button onclick="scrollToSection('sec-patrocinadores')" class="menu-item" id="btn-nav-patrocinadores">Nuestros Patrocinadores</button>
+                <button onclick="scrollToSection('sec-donar')" class="menu-item" id="btn-nav-donar">Donar al Proyecto</button>
+                <button onclick="scrollToSection('sec-nosotros')" class="menu-item" id="btn-nav-nosotros">Sobre Nosotros</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">Cerrar Sesión</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <section id="sec-telemetria" class="content-section">
+                <div class="section-header">
+                    <h2>Telemetría del Dispositivo</h2>
+                    <div class="status-banner" id="status-text">Detectando conexión...</div>
+                </div>
+                
+                <div class="grid-metrics">
+                    <div class="metric-card border-blue">
+                        <span class="metric-label">Temperatura</span>
+                        <div class="metric-value"><span id="val-temp">0</span> <span class="metric-unit">°C</span></div>
+                    </div>
+                    <div class="metric-card border-blue">
+                        <span class="metric-label">Velocidad de Motores</span>
+                        <div class="metric-value"><span id="val-vel">0</span> <span class="metric-unit">RPM</span></div>
+                    </div>
+                    <div class="metric-card border-blue">
+                        <span class="metric-label">Tiempo de Operación</span>
+                        <div class="metric-value"><span id="val-time">0</span> <span class="metric-unit">s</span></div>
+                    </div>
+                    <div class="metric-card border-green">
+                        <span class="metric-label">Plástico PET Reciclado</span>
+                        <div class="metric-value"><span id="val-pet">0</span> <span class="metric-unit">g</span></div>
+                    </div>
+                </div>
+
+                <div class="control-actions">
+                    <button id="btn-start" onclick="controlDevice('start')" class="btn-success">Inicializar Dispositivo</button>
+                    <button id="btn-stop" onclick="controlDevice('stop')" class="btn-danger">Apagar Dispositivo</button>
+                </div>
+            </section>
+
+            <section id="sec-historial" class="content-section">
+                <h2>Historial de Producción</h2>
+                <div class="table-container" id="history-section">
+                    Cargando reportes de producción...
+                </div>
+            </section>
+
+            <section id="sec-top" class="content-section">
+                <h2>Top Recicladores</h2>
+                <div class="list-container">
+                    <ol class="ranking-list" id="ranking-section">
+                        Cargando podio global...
+                    </ol>
+                </div>
+            </section>
+
+            <section id="sec-patrocinadores" class="content-section">
+                <h2>Nuestros Patrocinadores</h2>
+                <p class="section-desc">Ranking de alumnos y organizaciones aliadas que apoyan el desarrollo tecnológico de 3Demption.</p>
+                
+                <div class="list-container">
+                    <ol id="sponsor-ranking-section" class="ranking-list">
+                        </ol>
+                </div>
+            </section>
+
+            <section id="sec-donar" class="content-section">
+                <h2>Donar al Proyecto</h2>
+                <p class="section-desc">Tu contribución económica nos ayuda a expandir el alcance de este sistema de conversión e investigación de filamento PET.</p>
+                <div class="donation-card">
+                    <h3>Soporte Económico vía PayPal</h3>
+                    <p>Las transacciones se procesan de forma externa y segura mediante protocolos cifrados standard.</p>
+                    <!-- <button onclick="window.open('https://www.paypal.com', '_blank')" class="btn-paypal">Proceder a Donación</button> -->
+                    <button>Donar con paypal...</button>
+                </div>
+            </section>
+
+            <section id="sec-nosotros" class="content-section">
+                <h2>Sobre Nosotros</h2>
+                <p class="section-desc">Desarrolladores del proyecto integrador enfocado en el desarrollo de hardware embebido y sistemas web de control.</p>
+                <div class="team-grid">
+                    <div class="member-card">
+                        <h4>Karina Esquivel <br>Néstor Daniel Becerra</h4>
+                        <p class="role">Ingeniería de Software & Firmware</p>
+                    </div>
+                    <div class="member-card">
+                        <h4>Equipo Colaborador</h4>
+                        <p class="role">Diseño Mecánico y Automatización</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

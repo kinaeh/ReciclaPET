@@ -1,0 +1,11 @@
+# Dependencias (Se ignoran porque son muy pesadas y se regeneran)
+backend/node_modules/
+node_modules/
+
+# Variables de entorno / Datos sensibles (Contiene contraseñas y JWT_SECRET)
+backend/.env
+.env
+
+# Archivos del sistema operativo o editores
+.DS_Store
+.vscode/
