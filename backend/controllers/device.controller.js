@@ -88,13 +88,24 @@ exports.apagarDispositivo = async (req, res) => {
 
 exports.obtenerHistorial = async (req, res) => {
     try {
+        // 1. Obtener los reportes del usuario
         const [reportes] = await db.execute(
             'SELECT fecha, tiempo_operacion, produccion_estimada FROM reportes_produccion WHERE id_usuario = ? ORDER BY fecha DESC',
             [req.user.id_usuario]
         );
+
+        // 2. Obtener el nombre y el total acumulado directo de la tabla usuarios
+        const [usuario] = await db.execute(
+            'SELECT nombre, total_pet_reciclado FROM usuarios WHERE id_usuario = ?',
+            [req.user.id_usuario]
+        );
         
-        // RNF8: Si el historial viene vacío se maneja para desplegar alerta personalizada
-        res.json(reportes);
+        // Devolvemos un objeto estructurado con toda la información
+        res.json({
+            nombre: usuario[0].nombre,
+            totalAcumulado: usuario[0].total_pet_reciclado,
+            reportes: reportes
+        });
     } catch (err) {
         res.status(500).json({ error: "Error al consultar historial." });
     }
@@ -102,12 +113,69 @@ exports.obtenerHistorial = async (req, res) => {
 
 exports.obtenerRanking = async (req, res) => {
     try {
-        // Consulta ordenada descendentemente para armar el podio (RF10)
+        // 1. Consulta ordenada descendentemente para armar el podio de usuarios
         const [ranking] = await db.execute(
             'SELECT nombre, total_pet_reciclado FROM usuarios ORDER BY total_pet_reciclado DESC LIMIT 10'
         );
-        res.json(ranking);
+
+        // 2. Consulta agregada para sumar los totales de TODOS los usuarios registrados
+        const [sumaGlobal] = await db.execute(
+            'SELECT SUM(total_pet_reciclado) AS gran_total FROM usuarios'
+        );
+
+        res.json({
+            ranking: ranking,
+            totalGlobal: sumaGlobal[0].gran_total || 0
+        });
     } catch (err) {
         res.status(500).json({ error: "Error al consultar el ranking." });
+    }
+};
+
+exports.obtenerSponsorRanking = async (req, res) => {
+    try {
+        // AGREGAMOS u.nombre al GROUP BY para evitar el error de MySQL
+        const [ranking] = await db.execute(`
+            SELECT u.nombre, CAST(SUM(d.monto) AS DECIMAL(10,2)) AS total_donado 
+            FROM usuarios u
+            INNER JOIN donaciones d ON u.id_usuario = d.id_usuario
+            GROUP BY u.id_usuario, u.nombre
+            ORDER BY total_donado DESC 
+            LIMIT 10
+        `);
+
+        res.json(ranking);
+    } catch (err) {
+        console.error("Error en SQL de Patrocinadores:", err); // Esto te dirá el error exacto en tu consola de Node
+        res.status(500).json({ error: "Error al obtener el ranking de patrocinadores." });
+    }
+};
+
+// SIMULACIÓN DE DONACIÓN ALEATORIA (Acomula si el usuario dona varias veces)
+exports.simularDonacion = async (req, res) => {
+    // Genera un monto aleatorio entre $50 y $500 MXN, redondeado a dos decimales
+    const montoRandom = parseFloat((50 + Math.random() * 450).toFixed(2));
+    const idUsuario = req.user.id_usuario;
+
+    try {
+        // 1. Insertamos el ticket individual de la donación
+        await db.execute(
+            'INSERT INTO donaciones (id_usuario, monto) VALUES (?, ?)',
+            [idUsuario, montoRandom]
+        );
+
+        // 2. Consultamos la sumatoria total acumulada de este usuario para devolvérsela al frontend
+        const [suma] = await db.execute(
+            'SELECT SUM(monto) AS total_acumulado FROM donaciones WHERE id_usuario = ?',
+            [idUsuario]
+        );
+
+        res.json({
+            mensaje: `¡Donación simulada con éxito! Has aportado $${montoRandom} MXN.`,
+            montoDonado: montoRandom,
+            totalAcumulado: suma[0].total_acumulado
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Error al procesar la donación simulada." });
     }
 };

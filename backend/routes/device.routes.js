@@ -16,4 +16,8 @@ router.post('/stop', verificarAuth, deviceController.apagarDispositivo);
 router.get('/history', verificarAuth, deviceController.obtenerHistorial);
 router.get('/ranking', verificarAuth, deviceController.obtenerRanking);
 
+//donación simulada
+router.get('/sponsor-ranking', verificarAuth, deviceController.obtenerSponsorRanking);
+router.post('/donate', verificarAuth, deviceController.simularDonacion);
+
 module.exports = router;

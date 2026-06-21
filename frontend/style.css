@@ -5,10 +5,18 @@
 body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     background-color: #161616;
-    color: #e5e7eb;
+    color: #ffffff;
     margin: 0;
     padding: 0;
     min-height: 100vh;
+}
+
+h3#metrica-global {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+h3#metrica-historial {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 /* 2. APLICAR LA TIPOGRAFÍA A TODOS LOS TÍTULOS Y SUBTÍTULOS */
@@ -20,7 +28,7 @@ h1, h2, h3, h4, .sidebar-header h3 {
 /* Reducimos un poco los tamaños de fuente porque "Press Start 2P" es muy ancha */
 .landing-info h1 {
     font-size: 2.2rem; /* Ajustado para que no se desborde */
-    color: #2563eb;
+    color: #7a1adf;
     margin: 0 0 20px 0;
 }
 
@@ -75,15 +83,13 @@ h1, h2, h3, h4, .sidebar-header h3 {
 }
 
 .landing-image-placeholder {
-    margin-top: 40px;
-    background: #222222;
-    border: 2px dashed #374151;
-    border-radius: 8px;
-    height: 250px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #6b7280;
+    text-align: center;
+}
+
+.landing-image-placeholder img {
+    width: 100%;
+    max-width: 620px;
+    height: auto;
 }
 
 .landing-auth {
@@ -127,7 +133,7 @@ input {
 }
 
 input:focus {
-    border-color: #2563eb;
+    border-color: #7a1adf;
     outline: none;
 }
 
@@ -147,15 +153,15 @@ button {
     transition: all 0.2s ease;
 }
 
-.btn-primary { background: #2563eb; color: #ffffff; }
-.btn-primary:hover { background: #1d4ed8; }
+.btn-primary { background: #7a1adf; color: #ffffff; }
+.btn-primary:hover { background: #9e56ea; }
 .btn-secondary { background: #374151; color: #e5e7eb; }
 .btn-secondary:hover { background: #4b5563; }
 .btn-success { background: #16a34a; color: #ffffff; width: 100%; }
 .btn-success:hover { background: #15803d; }
 .btn-danger { background: #dc2626; color: #ffffff; width: 100%; }
 .btn-danger:hover { background: #b91c1c; }
-.btn-paypal { background: #0070ba; color: #ffffff; font-size: 1rem; }
+.btn-paypal { background: #9e56ea; color: #ffffff; font-size: 1rem; }
 .btn-disabled { background: #2d2d2d !important; color: #6b7280 !important; cursor: not-allowed; }
 
 /* DISEÑO BARRA LATERAL IZQUIERDA */
@@ -216,7 +222,7 @@ button {
 }
 
 .menu-item.active {
-    background: #2563eb;
+    background: #7a1adf;
     color: #ffffff;
 }
 
@@ -288,7 +294,7 @@ button {
     border: 1px solid #2d2d2d;
 }
 
-.border-blue { border-left: 4px solid #2563eb; }
+.border-blue { border-left: 4px solid #7a1adf; }
 .border-green { border-left: 4px solid #16a34a; }
 
 .metric-label {
@@ -391,7 +397,7 @@ tr:last-child td { border-bottom: none; }
 
 .member-card { text-align: left; }
 .member-card h4 { margin: 0 0 10px 0; color: #ffffff; }
-.member-card .role { margin: 0; color: #2563eb; font-size: 0.9rem; }
+.member-card .role { margin: 0; color: #7a1adf; font-size: 0.9rem; }
 
 .donation-card {
     text-align: left;
@@ -482,4 +488,32 @@ tr:last-child td { border-bottom: none; }
     .table-container {
         overflow-x: auto; /* Permite desplazar la tabla de historial si es muy ancha */
     }
+}
+
+/* Asegura que los números y nombres del ranking de patrocinadores resalten con la estética del sitio */
+#sponsor-ranking-section li strong {
+    color: #4ade80 !important; /* Verde neón idéntico a las métricas activas */
+}
+
+#sponsor-ranking-section li {
+    font-family: 'Segoe UI', sans-serif;
+    color: #e5e7eb;
+}
+
+/* Contenedor de la imagen en la navbar */
+.sidebar-brand-img {
+    text-align: center;
+    margin-top: auto;      /* Empuja la imagen hacia abajo de forma dinámica */
+    padding: 20px 0;       /* Espaciado arriba y abajo de la botella */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilos de la imagen de la botella */
+.sidebar-brand-img img {
+    width: auto;          /* Ajusta el ancho según lo que necesites */
+    height: 270px;          /* Mantiene la proporción original de la imagen */
+    opacity: 1;         /* Un toque de opacidad para que combine con el tema oscuro */
+    transition: opacity 0.3s ease;
 }

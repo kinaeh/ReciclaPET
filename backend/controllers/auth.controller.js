@@ -29,12 +29,12 @@ exports.registrarUsuario = async (req, res) => {
         );
 
         if (dispositivo.length === 0) {
-            return res.status(400).json({ error: "La clave de producto no es válida o no existe." });
+            return res.status(400).json({ error: "La clave de producto no es válida o ya fue ocupada." });
         }
 
         // 2. Verificar si el dispositivo ya está vinculado a algún usuario
         if (dispositivo[0].usuario_id !== null) {
-            return res.status(400).json({ error: "Esta clave de dispositivo ya se encuentra vinculada por otro usuario." });
+            return res.status(400).json({ error: "Esta clave de dispositivo ya se encuentra vinculada." });
         }
 
         // 3. Cifrar la clave única con bcrypt antes de guardarla en la cuenta (RNF1)

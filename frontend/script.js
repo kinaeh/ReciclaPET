@@ -139,17 +139,28 @@ async function loadHistory() {
     const res = await fetch('/api/device/history', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
-    const reportes = await res.json();
+    const data = await res.json(); // Ahora 'data' contiene { nombre, totalAcumulado, reportes }
     const section = document.getElementById('history-section');
 
-    if (reportes.length === 0) {
-        section.innerHTML = `<p class="msg-alert" style="color: #fbbf24; padding: 20px;">No se encontraron registros de producción disponibles.</p>`;
+    // Validamos si el arreglo interno de reportes viene vacío
+    if (!data.reportes || data.reportes.length === 0) {
+        section.innerHTML = `
+            <h3 style="color: #a8a8a8; margin-bottom: 20px;">Total de PET reciclado (PET convertido a filamento) por ${data.nombre || localStorage.getItem('username')} = 0.00 g</h3>
+            <p class="msg-alert" style="color: #fbbf24; padding: 20px;">No se encontraron registros de producción disponibles.</p>
+        `;
         return;
     }
 
-    let html = `<table><tr><th>Fecha</th><th>Tiempo (s)</th><th>Filamento (g)</th></tr>`;
-    reportes.forEach(r => {
-        html += `<tr><td>${new Date(r.fecha).toLocaleString()}</td><td>${r.tiempo_operacion}</td><td>${r.produccion_estimada}</td></tr>`;
+    // Insertamos la métrica dinámica solicitada y abrimos la tabla
+    let html = `
+    <h3 id="metrica-historial" style="color: #a8a8a8; margin-bottom: 20px;">Total de PET reciclado (PET convertido a filamento) por ${data.nombre} = ${parseFloat(data.totalAcumulado).toFixed(2)} g</h3>
+    <table>
+        <tr><th>Fecha</th><th>Tiempo (s)</th><th>Filamento (g)</th></tr>
+    `;
+
+    // Iteramos sobre el arreglo interno 'data.reportes' aplicando .toFixed(2) al filamento
+    data.reportes.forEach(r => {
+        html += `<tr><td>${new Date(r.fecha).toLocaleString()}</td><td>${r.tiempo_operacion}</td><td>${parseFloat(r.produccion_estimada).toFixed(2)} g</td></tr>`;
     });
     html += `</table>`;
     section.innerHTML = html;
@@ -159,10 +170,16 @@ async function loadRanking() {
     const res = await fetch('/api/device/ranking', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
-    const ranking = await res.json();
+    const data = await res.json(); // Ahora 'data' contiene { ranking, totalGlobal }
     const section = document.getElementById('ranking-section');
 
-    section.innerHTML = ranking.map(u => `<li>${u.nombre} - <strong>${u.total_pet_reciclado} g</strong> reciclados</li>`).join('');
+    const metricaGlobalHTML = `<h3 id="metrica-global" style="color: #a8a8a8; margin-bottom: 20px;">Total de PET reciclado (PET convertido a filamento) = ${parseFloat(data.totalGlobal).toFixed(2)} g</h3>`;
+
+    // Mapeamos el arreglo interno 'data.ranking' controlando los decimales individuales
+    const listaHTML = data.ranking.map(u => `<li>${u.nombre} - <strong>${parseFloat(u.total_pet_reciclado).toFixed(2)} g</strong> reciclados</li>`).join('');
+
+    // Seteamos ambos componentes dentro del contenedor del ranking
+    section.innerHTML = metricaGlobalHTML + `<ul>${listaHTML}</ul>`;
 }
 
 function logout() {
@@ -173,27 +190,78 @@ function logout() {
     document.getElementById('dashboard-container').classList.add('hidden');
 }
 
+async function enviarDonacionSimulada() {
+    const statusTxt = document.getElementById('donacion-status');
+    statusTxt.textContent = "Procesando pago seguro simulado...";
+
+    try {
+        const res = await fetch('/api/device/donate', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            statusTxt.style.color = "#4ade80";
+            statusTxt.innerText = `${data.mensaje}\nTu saldo total aportado al proyecto es de: $${parseFloat(data.totalAcumulado).toFixed(2)} MXN.`;
+            
+            // Recargamos inmediatamente el ranking de patrocinadores para ver el movimiento en vivo
+            loadSponsorRanking();
+        } else {
+            statusTxt.style.color = "#f87171";
+            statusTxt.textContent = data.error || "No se pudo completar la transacción.";
+        }
+    } catch (err) {
+        statusTxt.style.color = "#f87171";
+        statusTxt.textContent = "Error de conexión con el servidor de pagos.";
+    }
+}
+
 async function loadSponsorRanking() {
     try {
         const res = await fetch('/api/device/sponsor-ranking', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const ranking = await res.json();
+        
+        // 1. Apuntamos exactamente al ul que me acabas de mostrar
         const section = document.getElementById('sponsor-ranking-section');
+        if (!section) return; // Si no existe en esta página, detenemos la función
 
-        if (ranking.length === 0) {
-            section.innerHTML = `<p style="color: #9ca3af; padding: 10px;">¡Sé el primer patrocinador simulado del proyecto!</p>`;
+        if (!res.ok) {
+            section.innerHTML = `<li style="color: #f87171; list-style: none;">Error al conectar con el servidor.</li>`;
             return;
         }
 
-        // Mapea los donadores simulados al contenedor en tu interfaz oscura
+        const ranking = await res.json();
+
+        // Si el backend responde con un objeto de error en vez de un arreglo
+        if (ranking.error) {
+            section.innerHTML = `<li style="color: #f87171; list-style: none;">${ranking.error}</li>`;
+            return;
+        }
+
+        // Si el arreglo viene vacío
+        if (!Array.isArray(ranking) || ranking.length === 0) {
+            section.innerHTML = `<li style="color: #9ca3af; list-style: none; padding: 10px;">¡Sé el primer patrocinador del proyecto!</li>`;
+            return;
+        }
+
+        // 2. Mapeamos los datos directamente como elementos <li> para tu <ul>
         section.innerHTML = ranking.map((donador, index) => `
             <li>
-                <span>${index + 1}. ${donador.nombre}</span> 
-                - <strong style="color: #2563eb;">$${donador.total_donado} MXN</strong>
+                <span class="rank-number">#${index + 1}</span> 
+                <span class="sponsor-name">${donador.nombre}</span> 
+                <span class="sponsor-amount" style="color: #4ade80; font-weight: bold; margin-left: 10px;">
+                    $${parseFloat(donador.total_donado).toFixed(2)} MXN
+                </span>
             </li>
         `).join('');
+
     } catch (err) {
         console.error("Error cargando el ranking de patrocinadores:", err);
+        const section = document.getElementById('sponsor-ranking-section');
+        if (section) {
+            section.innerHTML = `<li style="color: #f87171; list-style: none;">Error de red o servidor.</li>`;
+        }
     }
 }
