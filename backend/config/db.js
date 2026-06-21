@@ -12,7 +12,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Creamos un pool de conexiones para reutilizar enlaces eficientemente
+// pool de conexiones a reutilizar
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -23,5 +23,5 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Exportamos el pool usando la interfaz de Promesas (permite usar async/await)
+// exportar el pool usando la interfaz de Promesas (para usar async/await)
 module.exports = pool.promise();

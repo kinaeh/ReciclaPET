@@ -142,7 +142,7 @@ async function loadHistory() {
     const data = await res.json(); // Ahora 'data' contiene { nombre, totalAcumulado, reportes }
     const section = document.getElementById('history-section');
 
-    // Validamos si el arreglo interno de reportes viene vacío
+    // validar si el arreglo interno de reportes viene vacío
     if (!data.reportes || data.reportes.length === 0) {
         section.innerHTML = `
             <h3 style="color: #a8a8a8; margin-bottom: 20px;">Total de PET reciclado (PET convertido a filamento) por ${data.nombre || localStorage.getItem('username')} = 0.00 g</h3>
@@ -151,14 +151,14 @@ async function loadHistory() {
         return;
     }
 
-    // Insertamos la métrica dinámica solicitada y abrimos la tabla
+    // insertar la métrica dinámica solicitada y abrimos la tabla
     let html = `
     <h3 id="metrica-historial" style="color: #a8a8a8; margin-bottom: 20px;">Total de PET reciclado (PET convertido a filamento) por ${data.nombre} = ${parseFloat(data.totalAcumulado).toFixed(2)} g</h3>
     <table>
         <tr><th>Fecha</th><th>Tiempo (s)</th><th>Filamento (g)</th></tr>
     `;
 
-    // Iteramos sobre el arreglo interno 'data.reportes' aplicando .toFixed(2) al filamento
+    // iterar sobre el arreglo interno 'data.reportes' aplicando .toFixed(2) al filamento
     data.reportes.forEach(r => {
         html += `<tr><td>${new Date(r.fecha).toLocaleString()}</td><td>${r.tiempo_operacion}</td><td>${parseFloat(r.produccion_estimada).toFixed(2)} g</td></tr>`;
     });
@@ -175,10 +175,9 @@ async function loadRanking() {
 
     const metricaGlobalHTML = `<h3 id="metrica-global" style="color: #a8a8a8; margin-bottom: 20px;">Total de PET reciclado (PET convertido a filamento) = ${parseFloat(data.totalGlobal).toFixed(2)} g</h3>`;
 
-    // Mapeamos el arreglo interno 'data.ranking' controlando los decimales individuales
+    // mapear el arreglo interno 'data.ranking' controlando los decimales individuales
     const listaHTML = data.ranking.map(u => `<li>${u.nombre} - <strong>${parseFloat(u.total_pet_reciclado).toFixed(2)} g</strong> reciclados</li>`).join('');
 
-    // Seteamos ambos componentes dentro del contenedor del ranking
     section.innerHTML = metricaGlobalHTML + `<ul>${listaHTML}</ul>`;
 }
 
@@ -223,7 +222,6 @@ async function loadSponsorRanking() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        // 1. Apuntamos exactamente al ul que me acabas de mostrar
         const section = document.getElementById('sponsor-ranking-section');
         if (!section) return; // Si no existe en esta página, detenemos la función
 
@@ -234,19 +232,15 @@ async function loadSponsorRanking() {
 
         const ranking = await res.json();
 
-        // Si el backend responde con un objeto de error en vez de un arreglo
         if (ranking.error) {
             section.innerHTML = `<li style="color: #f87171; list-style: none;">${ranking.error}</li>`;
             return;
         }
-
-        // Si el arreglo viene vacío
         if (!Array.isArray(ranking) || ranking.length === 0) {
             section.innerHTML = `<li style="color: #9ca3af; list-style: none; padding: 10px;">¡Sé el primer patrocinador del proyecto!</li>`;
             return;
         }
 
-        // 2. Mapeamos los datos directamente como elementos <li> para tu <ul>
         section.innerHTML = ranking.map((donador, index) => `
             <li>
                 <span class="rank-number">#${index + 1}</span> 

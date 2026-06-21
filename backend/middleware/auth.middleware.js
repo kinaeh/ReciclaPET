@@ -11,7 +11,7 @@ este archivo lo detecta, bloquea la petición y le responde al frontend con un e
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
-    // Buscar el token en las cabeceras de la petición
+    // buscar el token en las cabeceras de la petición
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer TOKEN"
 
@@ -21,8 +21,8 @@ module.exports = (req, res, next) => {
 
     try {
         const verificado = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = verificado; // Adjuntamos los datos descifrados del usuario a la petición
-        next(); // Permitimos pasar al siguiente eslabón (Controlador)
+        req.user = verificado; // adjuntar los datos descifrados del usuario a la petición
+        next(); // permitir pasar al siguiente eslabón (Controlador)
     } catch (err) {
         res.status(403).json({ error: "Token inválido o expirado." });
     }
